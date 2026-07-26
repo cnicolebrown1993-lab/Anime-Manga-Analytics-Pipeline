@@ -7,6 +7,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 CSV_FOLDER = PROJECT_ROOT / "CSV files"
 
+OUTPUT_FOLDER = PROJECT_ROOT / "output"
+QUARANTINED_FOLDER = OUTPUT_FOLDER / "quarantined"
+
+
 TOP_ANIME_FILE = CSV_FOLDER / "top_1000_animes.csv"
 WATCHED_ANIME_FILE = CSV_FOLDER / "most_watched_anime_dataset_100_entries.csv"
 MANGA_FILE = CSV_FOLDER / "best-selling-manga.csv"
@@ -96,6 +100,21 @@ def separate_valid_and_quarantined_rows(
     valid_rows = dataframe[~quarantine_mask]
     return valid_rows, quarantined_rows
 
+def save_quarantined_row(
+        dataframe:pd.DataFrame,
+        filename:str,
+) -> None:
+    """Save quarantined rows to the quarantined output folder."""
+
+    output_path = QUARANTINED_FOLDER / filename
+
+    dataframe.to_csv(
+        output_path
+        index=False,
+    )
+
+    print("\nSaved quarantined rows to:")
+    print(output_path)
 
 def validate_everything(
         name: str,
@@ -144,5 +163,9 @@ def main() -> None:
     print(f"Valid rows: {len(valid_watched_anime)}")
     print(f"Quarantined rows: {len(quarantined_watched_anime)}")
 
+    save_quarantined_row(
+        quarantined_watched_anime,
+        "most_watched_missing_titles.csv",
+    )
 if __name__ == "__main__":
     main()   
