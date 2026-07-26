@@ -109,7 +109,7 @@ def save_quarantined_row(
     output_path = QUARANTINED_FOLDER / filename
 
     dataframe.to_csv(
-        output_path
+        output_path,
         index=False,
     )
 
