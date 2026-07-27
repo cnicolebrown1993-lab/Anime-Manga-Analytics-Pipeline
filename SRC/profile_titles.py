@@ -9,7 +9,7 @@ CSV_FOLDER = PROJECT_ROOT / "CSV files"
 
 OUTPUT_FOLDER = PROJECT_ROOT / "output"
 QUARANTINED_FOLDER = OUTPUT_FOLDER / "quarantined"
-
+VALID_FOLDER = OUTPUT_FOLDER / "valid"
 
 TOP_ANIME_FILE = CSV_FOLDER / "top_1000_animes.csv"
 WATCHED_ANIME_FILE = CSV_FOLDER / "most_watched_anime_dataset_100_entries.csv"
@@ -116,6 +116,37 @@ def save_quarantined_row(
     print("\nSaved quarantined rows to:")
     print(output_path)
 
+def clean_text_column(
+        dataframe: pd.DataFrame,
+        column_name: str,
+) -> pd.DataFrame:
+    """Safely clean whitespace in one text column."""
+
+    cleaned_dataframe = dataframe.copy()
+        
+    cleaned_dataframe[column_name] = (
+         cleaned_dataframe[column_name]
+        .str.strip()
+        .str.replace(r"\s+", " ", regex=True)
+        )
+    return cleaned_dataframe
+
+def save_valid_rows(
+        dataframe: pd.DataFrame,
+        filename: str,
+) -> None:
+    """Save valid cleaned rows to the valid output folder."""
+
+    output_path = VALID_FOLDER / filename
+
+    dataframe.to_csv(
+        output_path,
+        index=False,
+    )
+
+    print("\nSaved valid rows to:")
+    print(output_path)
+
 def validate_everything(
         name: str,
         dataframe: pd.DataFrame,
@@ -157,6 +188,18 @@ def main() -> None:
             ["Anime Name"],
         )
     )
+
+    cleaned_watched_anime = clean_text_column(
+        valid_watched_anime,
+        "Anime Name",
+    )
+ 
+
+    save_valid_rows(
+        cleaned_watched_anime,
+        "most_watched_anime_cleaned.csv"
+    )
+
 
     print("\nSeparation results: Most Watched Anime")
     print("--------------------------------------")
