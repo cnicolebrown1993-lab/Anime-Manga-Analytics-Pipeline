@@ -1,5 +1,5 @@
 # Media Metadata ETL Pipeline
-#Data Quality Assessment
+# Data Quality Assessment
 
 During exploratory data profiling and validation, the Most Watched Anime dataset passed structural validation but exhibited several semantic inconsistencies during quality assessment.
 
