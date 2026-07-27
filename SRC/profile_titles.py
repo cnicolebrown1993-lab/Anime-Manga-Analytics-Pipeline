@@ -182,6 +182,42 @@ def main() -> None:
         ["Manga series"],
     )
 
+#--------------------------------------------------
+#TOP 1000 Anime
+#---------------------------------------------------
+    
+    valid_top_anime, quarantined_top_anime = (
+        separate_valid_and_quarantined_rows(
+            top_anime,
+            ["anime_id", "anime_name"],
+        )
+    )
+
+    cleaned_top_anime = clean_text_column(
+        valid_top_anime,
+        "anime_name",
+    )
+
+    print("\nSeparation results: Top 1000 Anime")
+    print("----------------------------------")
+    print(f"Valid rows: {len(valid_top_anime)}")
+    print(f"Quarantined rows: {len(quarantined_top_anime)}")
+
+    save_valid_rows(
+        cleaned_top_anime,
+        "top_1000_anime_cleaned.csv",
+    )
+
+    save_quarantined_row(
+        quarantined_top_anime,
+        "top_1000_anime_missing_required.csv",
+    )
+
+
+    # --------------------------------------------------
+    # Most Watched Anime
+    # --------------------------------------------------
+
     valid_watched_anime, quarantined_watched_anime = (
         separate_valid_and_quarantined_rows(
             watched_anime,
@@ -193,22 +229,54 @@ def main() -> None:
         valid_watched_anime,
         "Anime Name",
     )
- 
-
-    save_valid_rows(
-        cleaned_watched_anime,
-        "most_watched_anime_cleaned.csv"
-    )
-
 
     print("\nSeparation results: Most Watched Anime")
     print("--------------------------------------")
     print(f"Valid rows: {len(valid_watched_anime)}")
     print(f"Quarantined rows: {len(quarantined_watched_anime)}")
 
+    save_valid_rows(
+        cleaned_watched_anime,
+        "most_watched_anime_cleaned.csv",
+    )
+
     save_quarantined_row(
         quarantined_watched_anime,
         "most_watched_missing_titles.csv",
     )
+
+
+    # --------------------------------------------------
+    # Best-Selling Manga
+    # --------------------------------------------------
+
+    valid_manga, quarantined_manga = (
+        separate_valid_and_quarantined_rows(
+            manga,
+            ["Manga series"],
+        )
+    )
+
+    cleaned_manga = clean_text_column(
+        valid_manga,
+        "Manga series",
+    )
+
+    print("\nSeparation results: Best-Selling Manga")
+    print("--------------------------------------")
+    print(f"Valid rows: {len(valid_manga)}")
+    print(f"Quarantined rows: {len(quarantined_manga)}")
+
+    save_valid_rows(
+        cleaned_manga,
+        "best_selling_manga_cleaned.csv",
+    )
+
+    save_quarantined_row(
+        quarantined_manga,
+        "best_selling_manga_missing_titles.csv",
+    )
+
+
 if __name__ == "__main__":
     main()   
