@@ -1,25 +1,69 @@
-# Media Metadata ETL Pipeline
-# Data Quality Assessment
+# Anime & Manga Analytics Pipeline
 
-During exploratory data profiling and validation, the Most Watched Anime dataset passed structural validation but exhibited several semantic inconsistencies during quality assessment.
+A project-based data engineering pipeline built with Python to ingest, profile,
+validate, clean, quarantine, normalize, and prepare multiple anime and manga
+datasets for downstream analysis.
 
-Structural validation results
-Required fields were identified and validated.
-Records with missing required titles were quarantined.
-Duplicate title keys were detected and investigated.
-Title normalization was performed to support dataset joins.
-Semantic observations
+## Project Goals
 
-While investigating duplicate titles, several records contained values that were inconsistent with the known properties of the referenced anime. Examples included:
+- Build a reusable CSV ingestion and validation workflow
+- Identify missing, duplicate, and semantically inconsistent records
+- Quarantine invalid rows without losing source data
+- Normalize title fields for cross-dataset matching
+- Prepare cleaned datasets for integration and analysis
 
-Release years that did not align with the anime's actual release date.
-Episode counts that varied dramatically for the same title.
-Repeated titles with conflicting metadata.
+## Pipeline
 
-These observations suggest that the dataset is likely synthetic or generated for demonstration purposes rather than representing authoritative production data.
+Raw CSVs  
+↓  
+Load  
+↓  
+Profile  
+↓  
+Validate  
+↓  
+Separate valid and quarantined rows  
+↓  
+Clean text fields  
+↓  
+Create normalized title keys  
+↓  
+Measure match coverage  
+↓  
+Prepare for aggregation and merging  
 
-Project decision
+## Data Quality Assessment
 
-Because the primary objective of this project is to demonstrate the design of a data engineering pipeline—including ingestion, profiling, validation, cleansing, quarantine workflows, normalization, and dataset integration—the dataset was retained for the remainder of the project.
+During exploratory profiling and validation, the **Most Watched Anime**
+dataset passed structural validation but exhibited several semantic
+inconsistencies.
 
-This decision is documented so that future readers understand the limitations of the source data while still being able to evaluate the engineering techniques demonstrated throughout the project.
+### Structural Validation Results
+
+- Required fields were identified and validated.
+- Records with missing required titles were quarantined.
+- Duplicate title keys were detected and investigated.
+- Title normalization was performed to support dataset joins.
+
+### Semantic Observations
+
+Several records contained values that conflicted with the known properties of
+the referenced anime, including:
+
+- Release years that did not align with the title
+- Episode counts that varied dramatically for the same anime
+- Repeated titles with conflicting metadata
+
+These observations suggest that the dataset is likely synthetic or generated
+for demonstration purposes rather than representing authoritative production
+data.
+
+### Project Decision
+
+Because the primary objective of this project is to demonstrate the design of a
+data engineering pipeline—including ingestion, profiling, validation,
+cleansing, quarantine workflows, normalization, and dataset integration—the
+dataset was retained.
+
+The limitation is documented so readers can evaluate the engineering workflow
+without interpreting the final analytical results as authoritative.
