@@ -1,4 +1,4 @@
-# Anime & Manga Analytics Pipeline
+# Anime & Manga Analytics Pipeline  (Status: In progress)
 
 > A project-based data engineering pipeline demonstrating data ingestion, profiling, validation, cleansing, quarantine workflows, normalization, and dataset integration using Python.
 
