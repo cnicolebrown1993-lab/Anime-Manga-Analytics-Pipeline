@@ -161,6 +161,189 @@ def validate_everything(
     investigate_missing_values(name, dataframe)
     check_required_fields(name, dataframe, required_columns)
 
+def inspect_join_columns(
+        top_anime: pd.DataFrame,
+        watched_anime: pd.DataFrame,
+        manga: pd.DataFrame,
+) -> None:
+    """Inspect possible title columns before attempting merges."""
+
+    print("\nPotential join columns")
+    print("======================")
+
+    print("\nTop 1000 Anime columns:")
+    print(top_anime.columns.tolist())
+
+    print("\nMost Watched Anime columns:")
+    print(watched_anime.columns.tolist())
+
+    print("\nBest-Selling Manga columns:")
+    print(manga.columns.tolist())
+
+    print("\nSample Top 1000 Anime titles:")
+    print(top_anime["anime_name"].head(10).to_string(index=False))
+
+    print("\nSample Most Watched Anime titles:")
+    print(watched_anime["Anime Name"].head(10).to_string(index=False))
+
+    print("\nSample Best-Selling Manga titles:")
+    print(manga["Manga series"].head(10).to_string(index=False))
+
+def create_title_key(
+        dataframe: pd.DataFrame,
+        source_column: str,
+        key_column: str = "title_key",
+) -> pd.DataFrame:
+    """Create a normalized technical key for exact title matching."""
+
+    keyed_dataframe = dataframe.copy()
+
+    keyed_dataframe[key_column] = (
+        keyed_dataframe[source_column]
+        .str.lower()
+        .str.strip()
+        .str.replace(r"[^a-z0-9\s]", "", regex=True)
+        .str.replace(r"\s+", " ", regex=True)
+        .str.strip()
+    )
+
+    return keyed_dataframe
+
+def inspect_match_coverage(
+        top_anime: pd.DataFrame,
+        watched_anime: pd.DataFrame,
+        manga: pd.DataFrame,
+) -> None:
+    """Measure exact title overlap and duplicate join keys."""
+
+    top_keys = set(top_anime["title_key"])
+    watched_keys = set(watched_anime["title_key"])
+    manga_keys = set(manga["title_key"])
+
+    top_watched_matches = top_keys.intersection(watched_keys)
+    top_manga_matches = top_keys.intersection(manga_keys)
+
+    print("\nExact-match coverage")
+    print("====================")
+
+    print(
+        "\nUnique Top Anime titles:",
+        top_anime["title_key"].nunique(),
+    )
+    print(
+        "Unique Watched Anime titles:",
+        watched_anime["title_key"].nunique(),
+    )
+    print(
+        "Unique Manga titles:",
+        manga["title_key"].nunique(),
+    )
+
+    print(
+        "\nExact matches between Top Anime and Watched Anime:",
+        len(top_watched_matches),
+    )
+    print(
+        "Exact matches between Top Anime and Manga:",
+        len(top_manga_matches),
+    )
+
+    print("\nDuplicate title keys:")
+    print(
+        "Top Anime:",
+        top_anime["title_key"].duplicated().sum(),
+    )
+    print(
+        "Watched Anime:",
+        watched_anime["title_key"].duplicated().sum(),
+    )
+    print(
+        "Manga:",
+        manga["title_key"].duplicated().sum(),
+    )
+
+    print("\nSample Top Anime ↔ Watched Anime matches:")
+    print(sorted(top_watched_matches)[:20])
+
+    print("\nSample Top Anime ↔ Manga matches:")
+    print(sorted(top_manga_matches)[:20])
+
+def inspect_duplicate_title_keys(
+        dataframe: pd.DataFrame,
+        name: str,
+        title_column: str,
+) -> None:
+    """Display rows whose normalized title key appears more than once."""
+
+    duplicate_mask = dataframe["title_key"].duplicated(keep=False)
+
+    duplicate_rows = (
+        dataframe[duplicate_mask]
+        .sort_values(["title_key"])
+    )
+
+    print(f"\nDuplicate-key investigation: {name}")
+    print("=" * (29 + len(name)))
+
+    print(
+        f"Rows involved in duplicate keys: "
+        f"{len(duplicate_rows)}"
+    )
+
+    print(
+        f"Distinct duplicated keys: "
+        f"{duplicate_rows['title_key'].nunique()}"
+    )
+
+    print(
+        duplicate_rows[
+            [
+                title_column,
+                "title_key",
+                "Most Watched in Country",
+                "Ratings",
+                "Number of Episodes",
+                "Release Year",
+            ]
+        ].to_string(index=False)
+    )
+
+def check_watched_anime_semantics(
+        dataframe: pd.DataFrame,
+) -> None:
+    """Flag suspicious values in the watched-anime dataset."""
+
+    suspicious_release_years = dataframe[
+        (dataframe["Release Year"] < 1960)
+        | (dataframe["Release Year"] > 2026)
+    ]
+
+    suspicious_episode_counts = dataframe[
+        dataframe["Number of Episodes"] > 150
+    ]
+
+    suspicious_durations = dataframe[
+        dataframe["Duration per Episode (minutes)"] > 90
+    ]
+
+    print("\nSemantic validation: Most Watched Anime")
+    print("========================================")
+
+    print(
+        f"Rows with suspicious release years: "
+        f"{len(suspicious_release_years)}"
+    )
+
+    print(
+        f"Rows with unusually high episode counts: "
+        f"{len(suspicious_episode_counts)}"
+    )
+
+    print(
+        f"Rows with unusually long episode durations: "
+        f"{len(suspicious_durations)}"
+    )
+
 def main() -> None:
     top_anime, watched_anime, manga = load_datasets()
 
@@ -276,7 +459,63 @@ def main() -> None:
         quarantined_manga,
         "best_selling_manga_missing_titles.csv",
     )
+    keyed_top_anime = create_title_key(
+        cleaned_top_anime,
+        "anime_name",
+    )
 
+    keyed_watched_anime = create_title_key(
+        cleaned_watched_anime,
+        "Anime Name",
+    )
+
+    keyed_manga = create_title_key(
+        cleaned_manga,
+        "Manga series",
+    )
+
+    inspect_join_columns(
+        keyed_top_anime,
+        keyed_watched_anime,
+        keyed_manga,
+    )
+
+    print("\nSample Top Anime title keys:")
+    print(
+        keyed_top_anime[
+            ["anime_name", "title_key"]
+        ].head(10).to_string(index=False)
+    )
+
+    print("\nSample Watched Anime title keys:")
+    print(
+        keyed_watched_anime[
+            ["Anime Name", "title_key"]
+        ].head(10).to_string(index=False)
+    )
+
+    print("\nSample Manga title keys:")
+    print(
+        keyed_manga[
+            ["Manga series", "title_key"]
+        ].head(10).to_string(index=False)
+    )
+
+    inspect_match_coverage(
+        keyed_top_anime,
+        keyed_watched_anime,
+        keyed_manga,
+    )
+
+    inspect_duplicate_title_keys(
+        keyed_watched_anime,
+        "Most Watched Anime",
+        "Anime Name",
+    )
+
+    check_watched_anime_semantics(
+        keyed_watched_anime,
+    )
 
 if __name__ == "__main__":
     main()   
